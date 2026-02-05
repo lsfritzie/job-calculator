@@ -502,12 +502,12 @@
                 </div>
 
                 <div class="percentage-box credit-box" id="customerCredit">
-                    <div class="percentage-label-top">Customer Credit Amount</div>
+                    <div class="percentage-label-top">Amount to Credit</div>
                     <div class="percentage-value-large" id="customerCreditValue">$0.00</div>
                 </div>
 
                 <div class="percentage-box debit-box" id="providerDebit">
-                    <div class="percentage-label-top">Provider Debit Amount</div>
+                    <div class="percentage-label-top">Amount to Debit</div>
                     <div class="percentage-value-large" id="providerDebitValue">$0.00</div>
                 </div>
             </div>
@@ -519,7 +519,7 @@
 
             <div class="approval-note" id="approvalNote">
                 <div class="note-icon">⚠️</div>
-                <div class="note-text">REMINDER: Customer credit amount is over $75. Please ask approval from the Escalations Team before processing the credit.</div>
+                <div class="note-text">REMINDER: Amount to credit is over $75. Please ask approval from the Escalations Team before processing the credit.</div>
             </div>
         </div>
     </div>
@@ -646,7 +646,7 @@
             const noteText = document.getElementById('noteText');
             
             if (refundPercentage === 100) {
-                noteText.textContent = 'Full Refund: Please use the "Credit/Pull Payout Button" in Admin';
+                noteText.textContent = 'Full Refund: Please use the "Credit/Pull Payout" Button in Admin';
             } else if (refundPercentage > 0) {
                 noteText.textContent = 'Partial Refund: Please manually credit the customer and manually debit the Pro.';
             }
@@ -866,4 +866,5 @@
         });
     </script>
 </body>
+
 </html>
