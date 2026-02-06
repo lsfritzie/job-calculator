@@ -626,8 +626,8 @@
             const trustSafetyFee = parseFloat(stripCurrency(document.getElementById('trustSafetyFee').value)) || 0;
             const contractorPayout = parseFloat(stripCurrency(document.getElementById('contractorPayout').value)) || 0;
             
-            const customerCreditAmount = (servicePrice + tax + trustSafetyFee) * (jobCompletion / 100);
-            const providerDebitAmount = contractorPayout * (jobCompletion / 100);
+            const customerCreditAmount = (servicePrice + tax + trustSafetyFee) * jobCompletion %;
+            const providerDebitAmount = contractorPayout * jobCompletion %;
             
             document.getElementById('customerCreditValue').textContent = '$' + customerCreditAmount.toLocaleString('en-US', {
                 minimumFractionDigits: 2,
@@ -868,4 +868,5 @@
 </body>
 
 </html>
+
 
