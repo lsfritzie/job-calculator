@@ -276,7 +276,6 @@
         }
 
         .percentage-box {
-            display: block;
             background: #f0f4ff;
             border: 3px solid #667eea;
             border-radius: 8px;
@@ -284,11 +283,10 @@
             text-align: center;
             box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
             transition: all 0.3s ease;
-            opacity: 0.5;
+            opacity: 0.3;
         }
 
         .percentage-box.active {
-            display: block;
             opacity: 1;
         }
 
@@ -348,6 +346,10 @@
             display: flex;
         }
 
+        .approval-note .note-text {
+            color: #7f1d1d;
+        }
+
         .note-icon {
             font-size: 24px;
             flex-shrink: 0;
@@ -358,10 +360,6 @@
             font-weight: 600;
             color: #92400e;
             line-height: 1.5;
-        }
-
-        .approval-note .note-text {
-            color: #7f1d1d;
         }
 
         .percentage-label-top {
@@ -501,25 +499,15 @@
                     <div class="percentage-value-large" id="refundValue">0%</div>
                 </div>
 
-                <div class="percentage-box credit-box" id="customerCredit">
-                    <div class="percentage-label-top">Amount to Credit</div>
-                    <div class="percentage-value-large" id="customerCreditValue">$0.00</div>
+                <div class="percentage-box debit-box" id="customerDebit">
+                    <div class="percentage-label-top">Customer Debit Amount</div>
+                    <div class="percentage-value-large" id="customerDebitValue">$0.00</div>
                 </div>
 
-                <div class="percentage-box debit-box" id="providerDebit">
-                    <div class="percentage-label-top">Amount to Debit</div>
-                    <div class="percentage-value-large" id="providerDebitValue">$0.00</div>
+                <div class="percentage-box credit-box" id="providerCredit">
+                    <div class="percentage-label-top">Pro Credit Amount</div>
+                    <div class="percentage-value-large" id="providerCreditValue">$0.00</div>
                 </div>
-            </div>
-
-            <div class="refund-note" id="refundNote">
-                <div class="note-icon">ℹ️</div>
-                <div class="note-text" id="noteText"></div>
-            </div>
-
-            <div class="approval-note" id="approvalNote">
-                <div class="note-icon">⚠️</div>
-                <div class="note-text">REMINDER: Amount to credit is over $75. Please ask approval from the Escalations Team before processing the credit.</div>
             </div>
         </div>
     </div>
@@ -556,13 +544,11 @@
                 buttonsDiv.remove();
             }
             
-            // Remove old answer container if exists
             const oldAnswer = reviewItem.querySelector('.review-answer');
             if (oldAnswer) {
                 oldAnswer.remove();
             }
             
-            // Create answer container with badge and undo button
             const answerContainer = document.createElement('div');
             answerContainer.className = 'review-answer';
             
@@ -617,50 +603,29 @@
             refundValue.textContent = refundPercentage + '%';
             refundBox.classList.add('active');
             
-            calculateCreditAndDebit(refundPercentage);
+            calculateDebitAndCredit(percentage, refundPercentage);
         }
 
-        function calculateCreditAndDebit(refundPercentage) {
+        function calculateDebitAndCredit(completionPercentage, refundPercentage) {
             const servicePrice = parseFloat(stripCurrency(document.getElementById('servicePrice').value)) || 0;
             const tax = parseFloat(stripCurrency(document.getElementById('tax').value)) || 0;
-            const trustSafetyFee = parseFloat(stripCurrency(document.getElementById('trustSafetyFee').value)) || 0;
             const contractorPayout = parseFloat(stripCurrency(document.getElementById('contractorPayout').value)) || 0;
             
-            const customerCreditAmount = (servicePrice + tax + trustSafetyFee) * jobCompletion %;
-            const providerDebitAmount = contractorPayout * jobCompletion %;
+            const customerDebitAmount = (servicePrice + tax) * (completionPercentage / 100);
+            const providerCreditAmount = contractorPayout * (completionPercentage / 100);
             
-            document.getElementById('customerCreditValue').textContent = '$' + customerCreditAmount.toLocaleString('en-US', {
+            document.getElementById('customerDebitValue').textContent = '$' + customerDebitAmount.toLocaleString('en-US', {
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2
             });
             
-            document.getElementById('providerDebitValue').textContent = '$' + providerDebitAmount.toLocaleString('en-US', {
+            document.getElementById('providerCreditValue').textContent = '$' + providerCreditAmount.toLocaleString('en-US', {
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2
             });
             
-            document.getElementById('customerCredit').classList.add('active');
-            document.getElementById('providerDebit').classList.add('active');
-            
-            const noteElement = document.getElementById('refundNote');
-            const noteText = document.getElementById('noteText');
-            
-            if (refundPercentage === 100) {
-                noteText.textContent = 'Full Refund: Please use the "Credit/Pull Payout" Button in Admin';
-            } else if (refundPercentage > 0) {
-                noteText.textContent = 'Partial Refund: Please manually credit the customer and manually debit the Pro.';
-            }
-            
-            if (refundPercentage > 0) {
-                noteElement.classList.add('active');
-            }
-            
-            const approvalNote = document.getElementById('approvalNote');
-            if (customerCreditAmount > 75) {
-                approvalNote.classList.add('active');
-            } else {
-                approvalNote.classList.remove('active');
-            }
+            document.getElementById('customerDebit').classList.add('active');
+            document.getElementById('providerCredit').classList.add('active');
         }
 
         function formatCurrencyInput(input) {
@@ -685,26 +650,21 @@
         }
 
         function undoAnswer(questionNum) {
-            // Remove the answer for this question
             delete answers[questionNum];
             
-            // Remove all answers after this question
             for (let i = questionNum + 1; i <= 6; i++) {
                 delete answers[i];
             }
             
-            // Reset all review items from this question onwards
             for (let i = questionNum; i <= 6; i++) {
                 const reviewItem = document.getElementById('review' + i);
                 reviewItem.className = 'review-item';
                 
-                // Remove answer container
                 const answerContainer = reviewItem.querySelector('.review-answer');
                 if (answerContainer) {
                     answerContainer.remove();
                 }
                 
-                // Restore buttons if they don't exist
                 const buttonsDiv = reviewItem.querySelector('.review-buttons');
                 if (!buttonsDiv) {
                     const newButtonsDiv = document.createElement('div');
@@ -732,15 +692,12 @@
                 }
             }
             
-            // Hide results
             document.getElementById('completionPercentage').classList.remove('active');
             document.getElementById('refundPercentage').classList.remove('active');
-            document.getElementById('customerCredit').classList.remove('active');
-            document.getElementById('providerDebit').classList.remove('active');
-            document.getElementById('refundNote').classList.remove('active');
+            document.getElementById('customerDebit').classList.remove('active');
+            document.getElementById('providerCredit').classList.remove('active');
             document.getElementById('approvalNote').classList.remove('active');
             
-            // Reset current question
             currentQuestion = questionNum;
             setActiveReviewItem(currentQuestion);
             updateProgress();
@@ -819,15 +776,14 @@
             
             document.getElementById('completionPercentage').classList.remove('active');
             document.getElementById('refundPercentage').classList.remove('active');
-            document.getElementById('customerCredit').classList.remove('active');
-            document.getElementById('providerDebit').classList.remove('active');
+            document.getElementById('customerDebit').classList.remove('active');
+            document.getElementById('providerCredit').classList.remove('active');
             document.getElementById('refundNote').classList.remove('active');
-            document.getElementById('approvalNote').classList.remove('active');
 
             document.getElementById('percentageValue').textContent = '0%';
             document.getElementById('refundValue').textContent = '0%';
-            document.getElementById('customerCreditValue').textContent = '$0.00';
-            document.getElementById('providerDebitValue').textContent = '$0.00';
+            document.getElementById('customerDebitValue').textContent = '$0.00';
+            document.getElementById('providerCreditValue').textContent = '$0.00';
 
             document.getElementById('servicePrice').value = '';
             document.getElementById('tax').value = '';
@@ -853,8 +809,9 @@
                 formatCurrencyInput(this);
                 
                 if (document.getElementById('refundPercentage').classList.contains('active')) {
-                    const refundPercentage = 100 - calculateJobCompletion();
-                    calculateCreditAndDebit(refundPercentage);
+                    const completionPercentage = calculateJobCompletion();
+                    const refundPercentage = 100 - completionPercentage;
+                    calculateDebitAndCredit(completionPercentage, refundPercentage);
                 }
             });
             
@@ -866,7 +823,4 @@
         });
     </script>
 </body>
-
 </html>
-
-
